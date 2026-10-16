@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5b092e">
+  <meta name="description" content="Небольшой праздничный подарок с пожеланиями от тайного друга." />
+  <title>Записка с продолжением</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --wine: #5b092e;
+      --wine-deep: #3d0622;
+      --pink: #e626a6;
+      --pink-light: #f27bc9;
+      --yellow: #ffda27;
+      --cream: #fff9e9;
+      --ink: #321425;
+      --soft-white: #fffdf8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; min-width: 320px; min-height: 100vh;
+      color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--wine);
+    }
+    button { font: inherit; }
+    .shell { width: min(100% - 28px, 1080px); margin-inline: auto; }
+    .site-head { height: 72px; display: flex; align-items: center; justify-content: space-between; color: white; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: .88rem; font-weight: 650; letter-spacing: .01em; }
+    .brand-icon { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; color: var(--yellow); font-size: 18px; }
+    .head-tag { padding: 7px 12px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: #fff1b0; font-size: .76rem; }
+    .edit-toggle { padding: 8px 13px; border: 1px solid rgba(255,255,255,.56); border-radius: 999px; background: transparent; color: white; font-weight: 650; cursor: pointer; }
+    .edit-toggle[hidden] { display: none; }
+    .copy-editor { margin: 0 auto 18px; padding: 22px; border: 2px solid var(--yellow); border-radius: 18px; background: var(--cream); }
+    .copy-editor[hidden] { display: none; }
+    .copy-editor h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .editor-help { margin: 0 0 17px; color: #71616a; font-size: .9rem; }
+    .editor-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .editor-field { display: grid; gap: 5px; color: var(--ink); font-size: .82rem; font-weight: 700; }
+    .editor-field textarea { width: 100%; min-height: 68px; padding: 10px 11px; resize: vertical; border: 1px solid #d6cbd0; border-radius: 10px; background: white; color: var(--ink); font: inherit; font-weight: 450; line-height: 1.4; }
+    .editor-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+    .editor-actions .action { min-height: 42px; padding-inline: 16px; font-size: .87rem; }
+    .editor-status { margin: 10px 0 0; color: #71616a; font-size: .82rem; }
+
+    .story-wrap { position: relative; padding: 16px 0 76px; background: var(--wine); overflow: hidden; }
+    .story-wrap::after {
+      content: ""; position: absolute; z-index: 0; left: -8%; right: -8%; bottom: -57px; height: 100px;
+      border-radius: 50% 50% 0 0 / 65% 65% 0 0; background: var(--yellow); transform: rotate(-1.5deg);
+    }
+    .story-card {
+      position: relative; z-index: 1; min-height: 435px; padding: clamp(28px, 6vw, 66px);
+      display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: center;
+      overflow: hidden; border-radius: 26px; background: var(--cream); box-shadow: 0 18px 60px rgba(27,0,14,.25);
+    }
+    .story-copy { position: relative; z-index: 1; }
+    .eyebrow { margin: 0 0 11px; color: #9e1468; font-size: .76rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 600px; margin: 0 0 24px; font-size: clamp(2.3rem, 6vw, 4.55rem); line-height: .98; letter-spacing: -.06em; }
+    .steps { min-height: 128px; display: grid; align-content: start; gap: 11px; margin: 0; padding: 0; list-style: none; }
+    .step { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 11px; align-items: start; animation: appear .35s ease both; }
+    .step[hidden] { display: none; }
+    .step-no { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--yellow); font-size: .78rem; font-weight: 800; }
+    .step-text { padding-top: 2px; font-size: 1.02rem; }
+    .action-row { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 13px; }
+    .action {
+      min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--pink); color: white;
+      font-weight: 750; cursor: pointer; box-shadow: 0 6px 0 #b7127d; transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .action:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #b7127d; }
+    .action:active { transform: translateY(3px); box-shadow: 0 3px 0 #b7127d; }
+    .action:focus-visible, .candy-button:focus-visible { outline: 3px solid var(--wine); outline-offset: 4px; }
+    .action[hidden] { display: none; }
+    .step-status { color: #71616a; font-size: .82rem; }
+    .hero-art { position: relative; height: 245px; display: grid; place-items: center; }
+    .party-hat { position: absolute; right: 20px; top: 3px; width: 105px; height: 125px; transform: rotate(14deg); }
+    .hat-cone { width: 0; height: 0; margin: auto; border-left: 49px solid transparent; border-right: 49px solid transparent; border-bottom: 112px solid var(--pink); filter: drop-shadow(0 5px 0 rgba(91,9,46,.1)); }
+    .hat-cone::after { content: ""; position: relative; display: block; top: 60px; left: -36px; width: 72px; height: 11px; transform: rotate(-3deg); background: var(--yellow); }
+    .hat-ball { position: absolute; top: -3px; left: 45px; width: 18px; height: 18px; border-radius: 50%; background: var(--yellow); }
+    .bow {
+      position: absolute; left: 10px; bottom: 35px; width: 145px; height: 66px; transform: rotate(-9deg);
+    }
+    .bow::before, .bow::after { content: ""; position: absolute; top: 0; width: 65px; height: 53px; border: 6px solid var(--pink); background: #ffe4a1; }
+    .bow::before { left: 0; border-radius: 70% 18% 70% 18%; transform: rotate(17deg); }
+    .bow::after { right: 0; border-radius: 18% 70% 18% 70%; transform: rotate(-17deg); }
+    .bow-center { position: absolute; z-index: 1; top: 17px; left: 61px; width: 28px; height: 28px; border-radius: 8px; background: var(--yellow); }
+    .art-star { position: absolute; color: #e5ab00; font-size: 25px; }
+    .art-star.a { top: 15px; left: 16px; } .art-star.b { right: 4px; bottom: 20px; color: var(--pink); font-size: 18px; }
+
+    .wishes-wrap { position: relative; min-height: calc(100svh - 72px); padding: 52px 0 66px; background: var(--yellow); overflow: hidden; }
+    .wishes-wrap[hidden] { display: none; }
+    .wishes-wrap::before, .wishes-wrap::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
+    .wishes-wrap::before { width: 440px; height: 440px; top: -260px; left: -200px; border: 2px solid rgba(91,9,46,.16); }
+    .wishes-wrap::after { width: 300px; height: 300px; right: -170px; bottom: -170px; background: rgba(230,38,166,.14); }
+    .wishes-head { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 19px; }
+    .wishes-head .eyebrow { color: #74214c; }
+    h2 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.7rem); line-height: 1.03; letter-spacing: -.045em; }
+    .progress { padding: 8px 13px; border-radius: 999px; background: rgba(255,255,255,.62); color: #5b092e; font-size: .83rem; font-weight: 750; white-space: nowrap; }
+    .wish-stage {
+      position: relative; z-index: 1; min-height: min(67vh, 540px); padding: 28px;
+      display: grid; place-items: center; overflow: hidden; border-radius: 28px; background: var(--wine);
+      box-shadow: 0 16px 35px rgba(91,9,46,.17);
+    }
+    .stage-spark { position: absolute; color: var(--yellow); opacity: .9; font-size: clamp(18px, 4vw, 34px); animation: twinkle 2.3s ease-in-out infinite alternate; }
+    .stage-spark.s1 { top: 12%; left: 12%; } .stage-spark.s2 { top: 20%; right: 14%; animation-delay: .5s; }
+    .stage-spark.s3 { bottom: 17%; left: 19%; animation-delay: .9s; } .stage-spark.s4 { bottom: 12%; right: 12%; animation-delay: .2s; }
+    .wish-content { position: relative; z-index: 1; width: min(100%, 580px); display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .wish-instruction { margin: 0 0 21px; color: #fff3c4; font-size: .96rem; }
+    .candy-button {
+      position: relative; width: clamp(250px, 48vw, 410px); height: clamp(142px, 25vw, 210px); margin: 0 0 12px;
+      display: grid; place-items: center; border: 0; background: transparent; color: white; cursor: pointer;
+      filter: drop-shadow(0 14px 10px rgba(20,0,10,.24)); transition: transform .25s ease, filter .25s ease;
+    }
+    .candy-button:hover { transform: rotate(-2deg) scale(1.045); filter: drop-shadow(0 18px 14px rgba(20,0,10,.27)); }
+    .candy-button:disabled { cursor: default; }
+    .candy-button:disabled:hover { transform: none; }
+    .candy-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .candy-label { position: relative; z-index: 1; margin-top: -2px; color: #5b092e; font-size: clamp(1.05rem, 2.2vw, 1.42rem); font-weight: 900; letter-spacing: -.035em; text-shadow: 0 1px rgba(255,255,255,.35); }
+    .candy-button.opened { animation: unwrap .55s ease both; }
+    .wish-message {
+      max-width: 540px; margin: 0; padding: 16px 24px; border-radius: 16px; background: var(--cream); color: var(--ink);
+      font-size: clamp(1.14rem, 3vw, 1.7rem); font-weight: 700; line-height: 1.3; box-shadow: 0 10px 25px rgba(0,0,0,.12);
+      animation: appear .38s ease both;
+    }
+    .wish-message[hidden] { display: none; }
+    .next-row { min-height: 58px; margin-top: 21px; display: flex; justify-content: center; }
+    .next-row .action { min-width: 170px; }
+    .next-row .action[hidden] { display: none; }
+    .final-message { max-width: 620px; padding: 35px; border: 2px solid rgba(91,9,46,.2); border-radius: 25px; background: var(--cream); text-align: center; box-shadow: 0 15px 35px rgba(91,9,46,.12); }
+    .final-message .emoji { display: block; margin-bottom: 12px; font-size: 42px; }
+    .final-message p { margin: 10px 0 0; font-size: clamp(1.1rem, 2.5vw, 1.35rem); }
+    .final-message[hidden] { display: none; }
+    .wishes-foot { position: relative; z-index: 1; margin: 17px 0 0; color: #674c2d; font-size: .82rem; text-align: center; }
+    .confetti-piece { position: fixed; z-index: 8; width: 9px; height: 15px; border-radius: 2px; pointer-events: none; animation: burst 1.55s cubic-bezier(.12,.68,.28,1) forwards; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes twinkle { from { opacity: .45; transform: scale(.85) rotate(0); } to { opacity: 1; transform: scale(1.12) rotate(12deg); } }
+    @keyframes unwrap { 35% { transform: scale(1.12) rotate(4deg); } 100% { transform: scale(.94); opacity: .55; } }
+    @keyframes burst { 0% { transform: translate(-50%, -50%) scale(.15) rotate(0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1) rotate(var(--rot)); opacity: 0; } }
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 20px, 520px); }
+      .site-head { height: 60px; }
+      .copy-editor { padding: 17px; }
+      .editor-fields { grid-template-columns: 1fr; }
+      .editor-actions .action { flex: 1 1 100%; }
+      .story-wrap { padding: 10px 0 58px; }
+      .story-wrap::after { bottom: -63px; }
+      .story-card { min-height: 0; padding: 24px 21px 27px; grid-template-columns: 1fr; gap: 0; border-radius: 22px; }
+      .hero-art { grid-row: 1; height: 126px; margin: -7px 0 5px; }
+      .party-hat { right: calc(50% - 94px); top: 0; transform: scale(.73) rotate(14deg); transform-origin: top center; }
+      .bow { left: calc(50% - 95px); bottom: 0; transform: scale(.82) rotate(-9deg); transform-origin: bottom center; }
+      .art-star.a { left: 18%; top: 27px; } .art-star.b { right: 18%; bottom: 10px; }
+      h1 { margin-bottom: 21px; font-size: clamp(2.45rem, 12vw, 3.4rem); }
+      .steps { min-height: 168px; gap: 12px; }
+      .step-text { font-size: .98rem; }
+      .action-row { margin-top: 15px; }
+      .action { min-width: 154px; }
+      .wishes-wrap { min-height: calc(100svh - 60px); padding: 38px 0 40px; }
+      .wishes-head { align-items: center; margin-bottom: 15px; }
+      .wishes-head .eyebrow { margin-bottom: 7px; }
+      h2 { font-size: 1.8rem; }
+      .progress { padding: 7px 10px; font-size: .77rem; }
+      .wish-stage { min-height: 66svh; padding: 20px 14px; border-radius: 22px; }
+      .wish-instruction { margin-bottom: 26px; }
+      .candy-button { width: min(80vw, 350px); height: 174px; margin-bottom: 16px; }
+      .wish-message { padding: 16px 18px; }
+      .final-message { padding: 28px 21px; }
+    }
+    @media (max-width: 370px) {
+      .head-tag { font-size: .7rem; }
+      .story-card { padding-inline: 17px; }
+      .step { grid-template-columns: 27px minmax(0,1fr); gap: 8px; }
+      .step-no { width: 25px; height: 25px; }
+      .wishes-head { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-head shell">
+    <div class="brand"><span class="brand-icon" aria-hidden="true">✦</span><span>подарок от тайного друга</span></div>
+    <div class="brand">
+      <button class="edit-toggle" id="edit-toggle" type="button" hidden>Изменить текст</button>
+      <span class="head-tag">маленький сюрприз</span>
+    </div>
+  </header>
+
+  <main>
+    <aside class="copy-editor shell" id="copy-editor" hidden aria-labelledby="editor-title">
+      <h2 id="editor-title">Настроить текст подарка</h2>
+      <p class="editor-help">Измени текст и нажми «Скачать gift-text.js». Замени этим файлом старый в репозитории GitHub.</p>
+      <form id="editor-form"><div class="editor-fields" id="editor-fields"></div>
+        <div class="editor-actions">
+          <button class="action" id="save-draft" type="button">Показать изменения</button>
+          <button class="action" id="download-copy" type="button">Скачать gift-text.js</button>
+          <button class="action" id="reset-copy" type="button">Сбросить</button>
+        </div>
+      </form>
+      <p class="editor-status" id="editor-status" aria-live="polite"></p>
+    </aside>
+    <section class="story-wrap" aria-labelledby="story-title">
+      <div class="story-card shell">
+        <div class="story-copy">
+          <p class="eyebrow">история одной записки</p>
+          <h1 id="story-title">Как ты здесь?</h1>
+          <ol class="steps" id="story-steps" aria-live="polite">
+            <li class="step"><span class="step-no">1</span><span class="step-text">Среди множества конфет тебе попалась записка с адресом сайта.</span></li>
+            <li class="step" hidden><span class="step-no">2</span><span class="step-text">Стало интересно, что там.</span></li>
+            <li class="step" hidden><span class="step-no">3</span><span class="step-text">Адрес оказался в браузере.</span></li>
+            <li class="step" hidden><span class="step-no">4</span><span class="step-text">А теперь ты читаешь эти пункты. Значит, работает.</span></li>
+          </ol>
+          <div class="action-row">
+            <button class="action" id="continue" type="button">Продолжай</button>
+            <button class="action" id="to-wishes" type="button" hidden>Дальше</button>
+            <span class="step-status" id="step-status" aria-live="polite">1 из 4</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <span class="art-star a">✦</span><span class="art-star b">✧</span>
+          <div class="party-hat"><span class="hat-ball"></span><div class="hat-cone"></div></div>
+          <div class="bow"><span class="bow-center"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wishes-wrap" id="wishes" aria-labelledby="wishes-title" hidden>
+      <div class="shell">
+        <div class="wishes-head">
+          <div><p class="eyebrow">конфетная часть</p><h2 id="wishes-title">Конфеткиииии</h2></div>
+          <span class="progress" id="progress">Конфета 1 из 4</span>
+        </div>
+        <div class="wish-stage" id="wish-stage" aria-live="polite">
+          <span class="stage-spark s1" aria-hidden="true">✦</span><span class="stage-spark s2" aria-hidden="true">✳</span>
+          <span class="stage-spark s3" aria-hidden="true">✧</span><span class="stage-spark s4" aria-hidden="true">✦</span>
+          <div class="wish-content" id="wish-content">
+            <p class="wish-instruction" id="instruction">Нажми на конфету — внутри пожелание</p>
+            <button class="candy-button" id="candy" type="button" aria-label="Открыть конфету">
+              <svg class="candy-art" viewBox="0 0 500 250" role="img" aria-label="Конфета в блестящей обёртке">
+                <defs>
+                  <linearGradient id="foil" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff18a"/><stop offset=".42" stop-color="#ffda27"/><stop offset=".72" stop-color="#f2b80b"/><stop offset="1" stop-color="#fff0a3"/></linearGradient>
+                  <linearGradient id="pinkfoil" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ff9bdd"/><stop offset=".5" stop-color="#e626a6"/><stop offset="1" stop-color="#b90d73"/></linearGradient>
+                  <linearGradient id="sweet" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff9ca"/><stop offset=".38" stop-color="#ffe34b"/><stop offset="1" stop-color="#ffb80f"/></linearGradient>
+                </defs>
+                <path d="M169 99C132 73 85 46 37 48L68 91 31 126 85 131 58 173 151 145Z" fill="url(#pinkfoil)" stroke="#8d0a57" stroke-width="5" stroke-linejoin="round"/>
+                <path d="M332 99c37-26 84-53 132-51l-31 43 37 35-54 5 27 42-93-28Z" fill="url(#pinkfoil)" stroke="#8d0a57" stroke-width="5" stroke-linejoin="round"/>
+                <path d="m47 54 19 37-27 31 42 4-22 35M453 54l-19 37 27 31-42 4 22 35" fill="none" stroke="#ffd1ef" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+                <path d="M146 91c13-27 43-35 72-24 28-16 59-9 76 13 26 7 38 31 28 55-7 29-38 43-66 32-26 17-59 9-74-11-30-7-44-39-36-65Z" fill="url(#foil)" stroke="#b78000" stroke-width="5"/>
+                <path d="M158 83c12-13 26-17 43-16M286 80c12 6 21 17 24 29M176 133c13 11 28 14 43 11" fill="none" stroke="#fff9d9" stroke-width="7" stroke-linecap="round" opacity=".82"/>
+                <path d="m179 69 14 15-9 16m100-22-13 16 12 11m-93 15 14-12m60 19 14-13" fill="none" stroke="#f1bd1b" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+              </svg>
+              <span class="candy-label">Открыть</span>
+            </button>
+            <p class="wish-message" id="wish-message" hidden></p>
+            <div class="next-row"><button class="action" id="next-candy" type="button" hidden>Следующая</button></div>
+          </div>
+          <div class="final-message" id="final-message" hidden>
+            <span class="emoji" aria-hidden="true">🎁</span>
+            <p>Вот и всё. Надеюсь, тебе понравилось.</p>
+            <p>И приятного аппетита!</p>
+          </div>
+        </div>
+        <p class="wishes-foot">Конфеты настоящие. Сайт — тоже.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="./gift-text.js"></script>
+  <script>
+    (() => {
+      const DEFAULT_COPY = {
+        storyEyebrow: '',
+        storyTitle: 'Ты...',
+        steps: [
+          'Среди множества конфет тебе попалась записка с адресом сайта',
+          'Надеюсь, стало интересно, что это',
+          'Адрес оказался в браузере',
+          'А теперь ты читаешь эти пункты. Значит, работает'
+        ],
+        wishesEyebrow: '',
+        wishesTitle: 'Конфеткиииии',
+        instruction: 'Нажми на конфету — внутри пожелание',
+        wishes: [
+          'Чтобы на любимые занятия всегда находилось время!',
+          'Чтобы рядом были люди, с которыми спокойно и весело!',
+          'Пусть впереди будет побольше дней, которые заканчиваются мыслью: «Хороший был день».',
+          'Чтобы в обычных днях тоже регулярно случалось что-нибудь приятное.'
+        ],
+        ending: ['Вот и всё. Надеюсь, тебе понравилось', 'И приятного аппетита! Как говорится: "Конфет много не бывает"']
+      };
+      const copy = { ...DEFAULT_COPY, ...(window.GIFT_COPY || {}) };
+      copy.steps = [...(window.GIFT_COPY?.steps || DEFAULT_COPY.steps)];
+      copy.wishes = [...(window.GIFT_COPY?.wishes || DEFAULT_COPY.wishes)];
+      copy.ending = [...(window.GIFT_COPY?.ending || DEFAULT_COPY.ending)];
+
+      const steps = [...document.querySelectorAll('.step')];
+      const continueButton = document.querySelector('#continue');
+      const toWishesButton = document.querySelector('#to-wishes');
+      const stepStatus = document.querySelector('#step-status');
+      const wishesSection = document.querySelector('#wishes');
+      const candy = document.querySelector('#candy');
+      const message = document.querySelector('#wish-message');
+      const instruction = document.querySelector('#instruction');
+      const nextCandy = document.querySelector('#next-candy');
+      const progress = document.querySelector('#progress');
+      const finalMessage = document.querySelector('#final-message');
+      const wishContent = document.querySelector('#wish-content');
+      const editMode = new URLSearchParams(location.search).get('edit') === '1';
+      let shownStep = 0;
+      const wishes = [...copy.wishes];
+      let wishIndex = 0;
+      let opened = false;
+
+      function applyCopy() {
+        document.title = copy.storyTitle;
+        document.querySelector('.story-copy .eyebrow').textContent = copy.storyEyebrow;
+        document.querySelector('#story-title').textContent = copy.storyTitle;
+        steps.forEach((step, index) => { step.querySelector('.step-text').textContent = copy.steps[index]; });
+        document.querySelector('.wishes-head .eyebrow').textContent = copy.wishesEyebrow;
+        document.querySelector('#wishes-title').textContent = copy.wishesTitle;
+        instruction.textContent = copy.instruction;
+        message.textContent = copy.wishes[wishIndex] || '';
+        finalMessage.querySelectorAll('p').forEach((el, index) => { el.textContent = copy.ending[index]; });
+      }
+      applyCopy();
+
+      if (editMode) {
+        const editor = document.querySelector('#copy-editor');
+        const editorToggle = document.querySelector('#edit-toggle');
+        const fields = document.querySelector('#editor-fields');
+        const status = document.querySelector('#editor-status');
+        editor.hidden = false;
+        editorToggle.hidden = false;
+        editorToggle.addEventListener('click', () => editor.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+
+        const fieldSpecs = [
+          ['storyEyebrow', 'Подпись над вступлением'],
+          ['storyTitle', 'Заголовок вступления'],
+          ['step0', 'Пункт 1'], ['step1', 'Пункт 2'], ['step2', 'Пункт 3'], ['step3', 'Пункт 4'],
+          ['wishesEyebrow', 'Подпись над пожеланиями'],
+          ['wishesTitle', 'Заголовок пожеланий'],
+          ['instruction', 'Подсказка перед конфетой'],
+          ['wish0', 'Пожелание 1'], ['wish1', 'Пожелание 2'], ['wish2', 'Пожелание 3'], ['wish3', 'Пожелание 4'],
+          ['ending0', 'Финальная фраза 1'], ['ending1', 'Финальная фраза 2']
+        ];
+        const getValue = (key) => /^step\d$/.test(key) ? copy.steps[Number(key.slice(4))]
+          : /^wish\d$/.test(key) ? copy.wishes[Number(key.slice(4))]
+          : /^ending\d$/.test(key) ? copy.ending[Number(key.slice(6))] : copy[key];
+        fieldSpecs.forEach(([key, labelText]) => {
+          const label = document.createElement('label');
+          label.className = 'editor-field';
+          label.append(document.createTextNode(labelText));
+          const textarea = document.createElement('textarea');
+          textarea.name = key;
+          textarea.value = getValue(key) || '';
+          textarea.maxLength = 240;
+          label.append(textarea);
+          fields.append(label);
+        });
+
+        const collectCopy = () => {
+          const data = new FormData(document.querySelector('#editor-form'));
+          const next = { ...copy, steps: [...copy.steps], wishes: [...copy.wishes], ending: [...copy.ending] };
+          for (const [key, value] of data.entries()) {
+            if (!String(value).trim() && key !== 'storyEyebrow' && key !== 'wishesEyebrow') {
+              throw new Error('Заполни обязательные поля или восстанови исходный текст.');
+            }
+            if (/^step\d$/.test(key)) next.steps[Number(key.slice(4))] = String(value).trim();
+            else if (/^wish\d$/.test(key)) next.wishes[Number(key.slice(4))] = String(value).trim();
+            else if (/^ending\d$/.test(key)) next.ending[Number(key.slice(6))] = String(value).trim();
+            else next[key] = String(value).trim();
+          }
+          return next;
+        };
+        const saveDraft = (next) => {
+          Object.assign(copy, next);
+          applyCopy();
+          status.textContent = 'Изменения показаны в предпросмотре. Чтобы они появились у всех, скачай gift-text.js и загрузи его в репозиторий.';
+        };
+
+        document.querySelector('#save-draft').addEventListener('click', () => {
+          try { saveDraft(collectCopy()); }
+          catch (error) { status.textContent = error.message; }
+        });
+        document.querySelector('#download-copy').addEventListener('click', () => {
+          try {
+            const next = collectCopy();
+            saveDraft(next);
+            const content = `window.GIFT_COPY = ${JSON.stringify(next, null, 2)};\n`;
+            const url = URL.createObjectURL(new Blob([content], { type: 'text/javascript;charset=utf-8' }));
+            const link = document.createElement('a');
+            link.href = url; link.download = 'gift-text.js'; link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            status.textContent = 'Готово. Загрузи скачанный gift-text.js в корень репозитория рядом с index.html.';
+          } catch (error) { status.textContent = error.message; }
+        });
+        document.querySelector('#reset-copy').addEventListener('click', () => {
+          Object.assign(copy, { ...DEFAULT_COPY, steps: [...DEFAULT_COPY.steps], wishes: [...DEFAULT_COPY.wishes], ending: [...DEFAULT_COPY.ending] });
+          fields.querySelectorAll('textarea').forEach((textarea) => { textarea.value = getValue(textarea.name) || ''; });
+          applyCopy();
+          status.textContent = 'Исходный текст восстановлен в предпросмотре.';
+        });
+      }
+
+      continueButton.addEventListener('click', () => {
+        shownStep += 1;
+        steps[shownStep].hidden = false;
+        stepStatus.textContent = `${shownStep + 1} из ${steps.length}`;
+        if (shownStep === steps.length - 1) {
+          continueButton.hidden = true;
+          toWishesButton.hidden = false;
+        }
+      });
+
+      toWishesButton.addEventListener('click', () => {
+        wishesSection.hidden = false;
+        wishesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      candy.addEventListener('click', () => {
+        if (opened) return;
+        opened = true;
+        candy.classList.add('opened');
+        candy.setAttribute('aria-label', 'Конфета открыта');
+        candy.disabled = true;
+        instruction.hidden = true;
+        message.textContent = wishes[wishIndex] || '';
+        message.hidden = false;
+        nextCandy.hidden = false;
+        nextCandy.textContent = wishIndex === wishes.length - 1 ? 'Завершить' : 'Следующая';
+        burstConfetti();
+      });
+
+      nextCandy.addEventListener('click', () => {
+        if (wishIndex >= wishes.length - 1) {
+          wishContent.hidden = true;
+          progress.hidden = true;
+          finalMessage.hidden = false;
+          burstConfetti();
+          return;
+        }
+        wishIndex += 1;
+        opened = false;
+        progress.textContent = `Конфета ${wishIndex + 1} из ${wishes.length}`;
+        candy.disabled = false;
+        candy.classList.remove('opened');
+        candy.setAttribute('aria-label', 'Открыть конфету');
+        message.hidden = true;
+        nextCandy.hidden = true;
+        instruction.hidden = false;
+      });
+
+      function burstConfetti() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const colors = ['#ffda27', '#e626a6', '#fff9e9', '#f27bc9', '#ffed91'];
+        const candyRect = candy.getBoundingClientRect();
+        const originX = candyRect.width ? candyRect.left + candyRect.width / 2 : window.innerWidth / 2;
+        const originY = candyRect.height ? candyRect.top + candyRect.height / 2 : window.innerHeight * .48;
+        for (let i = 0; i < 120; i += 1) {
+          const piece = document.createElement('span');
+          piece.className = 'confetti-piece';
+          const angle = Math.random() * Math.PI * 2;
+          const distance = 100 + Math.random() * Math.max(window.innerWidth, window.innerHeight) * .58;
+          piece.style.left = `${originX}px`;
+          piece.style.top = `${originY}px`;
+          piece.style.background = colors[i % colors.length];
+          piece.style.width = `${6 + Math.random() * 7}px`;
+          piece.style.height = `${9 + Math.random() * 11}px`;
+          piece.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+          piece.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+          piece.style.setProperty('--rot', `${Math.random() * 1100 - 550}deg`);
+          piece.style.animationDelay = `${Math.random() * .18}s`;
+          document.body.append(piece);
+          piece.addEventListener('animationend', () => piece.remove(), { once: true });
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
